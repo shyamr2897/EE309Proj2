@@ -148,7 +148,6 @@ package EE224_Components is
         z_out: out std_logic);
     end component;
 
-
     component PadNine is
         port(x: in std_logic_vector (8 downto 0);
             y: out std_logic_vector (15 downto 0));
@@ -185,6 +184,36 @@ package EE224_Components is
             rs1_dec,rs2_dec,rd_read: in std_logic_vector(2 downto 0);
             dec_stall, read_stall: in std_logic;
             flag: out std_logic);
+    end component;
+
+    component FlagDecoder is
+        port(instr: in std_logic_vector(15 downto 0);
+            o_z, o_c, stall,in_z, in_c: in std_logic;
+            n_z,n_c,condition: out std_logic);
+    end component;
+
+    component RFW_Decoder is
+        port(instr: in std_logic_vector(15 downto 0);
+            in_rfw ,condition: in std_logic;
+            out_rfw: out std_logic);
+    end component;
+
+    component ControlHazardDetector is
+	port (
+		output_branch_loc: out std_logic_vector(15 downto 0);
+        output_branch_now,decode_stall,execute_stall,regread_stall: out std_logic;
+        decode_branch_now,regread_branch_now,execute_branch_now,memory_branch_now: in std_logic;
+        decode_branch_loc,regread_branch_loc,execute_branch_loc,
+        memory_branch_loc: in std_logic_vector(15 downto 0)
+	     );
+    end component;
+
+    component DHD is
+        port( ex_rfw, ex_stall, mem_rfw, mem_stall, wb_rfw, wb_stall: in std_logic;
+            rr_rs1, rr_rs2, ex_rd, mem_rd, wb_rd: in std_logic_vector(2 downto 0);
+            rr_data1, rr_data2, ex_data, mem_data, wb_data: in std_logic_vector(15 downto 0);
+            data1_out, data2_out: out std_logic_vector(15 downto 0)	      
+            );
     end component;
 end EE224_Components;
 

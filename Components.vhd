@@ -548,4 +548,59 @@ t0: TwosComplementSixteen port map (x => y, t => t);
 
 e1: SixteenBitAdder port map (x => x, y => t, s => s, c_out => b);
 end Struct;
+-------------------------------------------------------------------------------
+--RFW Decoder
+library ieee;
+use ieee.std_logic_1164.all;
+
+library work;
+use work.EE224_Components.all;
+
+entity RFW_Decoder is
+    port(instr: in std_logic_vector(15 downto 0);
+        in_rfw ,condition: in std_logic;
+        out_rfw: out std_logic);
+end entity;
+
+architecture Behave of RFW_Decoder is
+begin
+    process(instr, in_rfw, condition)
+        variable x_out_rfw: std_logic;
+    begin
+        if(instr(15 downto 12) /= "0000" and instr(15 downto 12) /= "0010") then
+            x_out_rfw := in_rfw;
+        else
+            x_out_rfw := in_rfw and condition;
+        end if;
+        out_rfw <= x_out_rfw;
+    end process;
+
+end Behave;
+
+-------------------------------------------------------------------------------
+--Pipeline Register P1
+library ieee;
+use ieee.std_logic_1164.all;
+
+library work;
+use work.EE224_Components.all;
+
+component P1 is
+    port(instr_in: in std_logic_vector(15 downto 0);
+        instr_out: out std_logic_vector(15 downto 0);
+        clk,enable: in std_logic);
+end entity;
+
+architecture Behave of P1 is
+begin
+    process(clk)
+    begin
+        if(clk'event and (clk  = '1')) then
+            if(enable = '1') then
+                instr_out <= instr_in;
+            end if;
+        end if;
+    end process;
+end Behave;
+
 
