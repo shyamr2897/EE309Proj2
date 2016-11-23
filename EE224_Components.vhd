@@ -180,6 +180,11 @@ package EE224_Components is
             mem_read, mem_write, rf_write: out std_logic);
     end component;
 
-
-    end EE224_Components;
+    component LoadHazard is
+        port(instr_dec, instr_read: in std_logic_vector(15 downto 0);
+            rs1_dec,rs2_dec,rd_read: in std_logic_vector(2 downto 0);
+            dec_stall, read_stall: in std_logic;
+            flag: out std_logic);
+    end component;
+end EE224_Components;
 
