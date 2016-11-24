@@ -40,26 +40,26 @@ begin
 		if (ex_pot = '1') then
 		    if (ex_rd_a = rr_rs1_a) then
 			data1_out_a := ex_data_a;
-			report "execute";
+			--report "execute";
 			flag := '0';
 		    end if;
 		end if;
 		if (mem_pot = '1' and flag = '1') then
 		    if (mem_rd_a = rr_rs1_a) then
 			data1_out_a := mem_data_a;
-			report "Mota";
+			--report "Mota";
 			flag := '0';
 		    end if;
 		end if;
 		if (wb_pot = '1' and flag = '1') then
 		    if (wb_rd_a = rr_rs1_a) then
 			data1_out_a := wb_data_a;
-			report "Mota2much";
+			--report "Mota2much";
 			flag := '0';
 		    end if;
 		end if;
 		if (flag = '1') then
-		    report "3";
+		    --report "3";
 		    data1_out_a := rr_data1_a;
 		end if;
 		flag := '1';

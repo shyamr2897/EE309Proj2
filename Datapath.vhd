@@ -133,8 +133,8 @@ architecture Mixed of Datapath is
     signal aluc, aluz : std_logic;
 
     --execute rd data
-    signal rdd_a, rdd_b, rdd_d: std_logic_vector(15 downto 0);
-    signal rdd_c: std_logic;
+    signal rdd_a, rdd_b, rdd_d, rdd_e: std_logic_vector(15 downto 0);
+    signal rdd_c, rdd_cout: std_logic;
 
     --flag decoder
     signal ef_instr:  std_logic_vector(15 downto 0);
@@ -247,6 +247,7 @@ begin
     a2 <= p2_rs2_out;
     a3 <= p5_rd_out;
     d3<= p5_rd_data_out;
+    pc_in <= fpc_in;
 
     --
     regfile: RF port map(rfw, pcw, a1, a2, a3, d3, pc_in, d1, d2, pc_out, rst, clk);
@@ -455,10 +456,10 @@ begin
     p3_rfw_in <= p2_rfw_out;
     p3_rs1_in <= p2_rs1_out;
     p3_rs2_in <= p2_rs2_out;
-    p3_rd_in <= p3_rd_out;
-    p3_br_st_in <= p2_br_st_in;
-    p3_rs1_data_in <= dhd_data1_out;
-    p3_rs2_data_in <= dhd_data2_out;
+    p3_rd_in <= p2_rd_out;
+    p3_br_st_in <= p2_br_st_out;
+    p3_rs1_data_in <= p2_pc_out when p2_rs1_out = "111" else dhd_data1_out;
+    p3_rs2_data_in <= p2_pc_out when p2_rs2_out = "111" else dhd_data2_out;
     p3_memloc_in <= rmemloc;
     p3_memdat_in <= rmemdata;
     process(clk,rst)
@@ -519,7 +520,8 @@ begin
     rdd_c <= '1' when p3_instr_out(15 downto 12) = "0000" or p3_instr_out(15 downto 12) = "0001"
                     or p3_instr_out(15 downto 12) = "0010" or
                     p3_instr_out(15 downto 12) = "0011" else '0';
-    rdexmux: MuxTwo port map(rdd_b, rdd_a, rdd_c, rdd_d);
+    rdadd16: SixteenBitAdder port map(rdd_b, (0 => '1', others => '0'), rdd_e, rdd_cout);
+    rdexmux: MuxTwo port map(rdd_e, rdd_a, rdd_c, rdd_d);
 
     --flag decoder--
     ef_instr <= p3_instr_out;
@@ -639,7 +641,7 @@ begin
 
     --load zero flag--
     mlz_a <= p5_rd_data_in;
-    mlz_b <= '0';
+    mlz_b <= p4_z_out;
     mlz_f <= p4_instr_out(15 downto 12);
     mlz_e <= not p4_stall_out;
     --
@@ -651,6 +653,7 @@ begin
     -----------------------------------------------------------------
     --Pipeline Register p5
     -----------------------------------------------------------------
+    p5_enable <= '1';
     p5_instr_in <= p4_instr_out;
     p5_pc_in <= p4_pc_out;
     p5_stall_in <= p4_stall_out;
@@ -666,7 +669,7 @@ begin
     p5_rs2_data_in <= p4_rs2_data_out;
     p5_memloc_in <= p4_memloc_out;
     p5_memdat_in <= p4_memdat_out;
-    p5_rd_data_in <= mem_edb when memw = '1' else p4_rd_data_out;
+    p5_rd_data_in <= mem_edb when memr = '1' else p4_rd_data_out;
     p5_z_in <= mlz_c;
     p5_c_in <= p4_c_out;
     process(clk,rst)

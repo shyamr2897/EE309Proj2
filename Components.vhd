@@ -577,30 +577,5 @@ begin
 
 end Behave;
 
--------------------------------------------------------------------------------
---Pipeline Register P1
-library ieee;
-use ieee.std_logic_1164.all;
-
-library work;
-use work.EE224_Components.all;
-
-component P1 is
-    port(instr_in: in std_logic_vector(15 downto 0);
-        instr_out: out std_logic_vector(15 downto 0);
-        clk,enable: in std_logic);
-end entity;
-
-architecture Behave of P1 is
-begin
-    process(clk)
-    begin
-        if(clk'event and (clk  = '1')) then
-            if(enable = '1') then
-                instr_out <= instr_in;
-            end if;
-        end if;
-    end process;
-end Behave;
 
 

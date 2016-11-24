@@ -23,8 +23,8 @@ begin
         else
             case instr(15 downto 12) is
                 when "0000" =>
-                    x_condition := (not instr(1) and not instr(0)) or (in_c and instr(1))
-                                    or (in_z and instr(0));
+                    x_condition := (not instr(1) and not instr(0)) or (o_c and instr(1))
+                                    or (o_z and instr(0));
                     if(x_condition = '1') then
                         x_n_z := in_z;
                         x_n_c := in_c;
@@ -32,14 +32,15 @@ begin
 
                 when "0010" =>
                     x_n_z := in_z;
-                    x_condition := (not in_z and not in_c) or (in_c and instr(1))
-                                    or (in_z and instr(0));
+                    x_condition := (not instr(1) and not instr(0)) or (o_c and instr(1))
+                                    or (o_z and instr(0));
 
                     if(x_condition = '1') then
                         x_n_z := in_z;
                     end if;
 
                 when "0001" =>
+                    x_condition := '1';
                     x_n_z := in_z;
                     x_n_c := in_c;
 

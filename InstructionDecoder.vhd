@@ -50,7 +50,8 @@ begin
 
             when "0010" =>      --NAND
                 x_rs1 := instr(11 downto 9);
-                x_rd := instr(8 downto 6);
+                x_rs2 := instr(8 downto 6);
+                x_rd := instr(5 downto 3);
 
                 if(x_rd = "111") then
                     x_branch := '1';
@@ -63,8 +64,7 @@ begin
 
             when "0001" =>      --ADI
                 x_rs1 := instr(11 downto 9);
-                x_rs2 := instr(8 downto 6);
-                x_rd := instr(5 downto 3);
+                x_rd := instr(8 downto 6);
 
                 if(x_rd = "111") then
                     x_branch := '1';
@@ -171,10 +171,10 @@ begin
 
             when "1001" =>      --JLR
                 x_rs1 := instr(8 downto 6);
-                x_rs2 := instr(11 downto 9);
+                x_rd := instr(11 downto 9);
 
                 x_branch := '1';
-                x_branch_state := "00";
+                x_branch_state := "01";
 
                 x_regread_br_loc := '1';
 
