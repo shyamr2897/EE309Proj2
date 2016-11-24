@@ -48,6 +48,20 @@ architecture Mixed of Datapath is
             : std_logic_vector(2 downto 0);
     signal p4_br_st_in, p4_br_st_out: std_logic_vector (1 downto 0);
 
+    --register p5
+    signal p5_instr_out, p5_instr_in, p5_pc_out, p5_pc_in,
+            p5_rs1_data_out, p5_rs2_data_out, p5_rs1_data_in, p5_rs2_data_in,
+            p5_memloc_in, p5_memloc_out, p5_memdat_in,
+            p5_memdat_out, p5_rd_data_in, p5_rd_data_out: std_logic_vector(15 downto 0);
+    signal p5_enable, p5_stall_out, p5_stall_in, p5_branch_in, p5_branch_out,
+            p5_rr_br_loc_in, p5_rr_br_loc_out, p5_mr_in, p5_mr_out,
+            p5_mw_in, p5_mw_out, p5_rfw_in, p5_rfw_out, p5_c_in, p5_c_out,
+            p5_z_in,p5_z_out: std_logic;
+    signal p5_rs1_in, p5_rs1_out, p5_rs2_in, p5_rs2_out, p5_rd_in, p5_rd_out
+            : std_logic_vector(2 downto 0);
+    signal p5_br_st_in, p5_br_st_out: std_logic_vector (1 downto 0);
+
+
     --instruction decoder
     signal id_ins: std_logic_vector(15 downto 0);
     signal id_mdr, id_rs1, id_rs2, id_rd: std_logic_vector (2 downto 0);
@@ -137,27 +151,57 @@ architecture Mixed of Datapath is
     signal ebn_a, ebn_b, ebn_c, ebn_d, ebn_f, ebn_g, ebn_h, ebn_i, ebn_j, ebn_k: std_logic;
     signal ebn_e: std_logic_vector (1 downto 0);
 
+    --data memory
+        signal memw, memr : std_logic;
+        signal mem_ad, mem_dat, mem_edb: std_logic_vector(15 downto 0);
+
+    --memory branch location
+    signal mbr_loc: std_logic_vector(15 downto 0);
+
+    --memory branch now
+    signal mbn_b, mbn_c, mbn_d, mbn_e, mbn_f: std_logic;
+    signal mbn_a: std_logic_vector(1 downto 0);
+
+    --memory load zero flag
+    signal mlz_a : std_logic_vector(15 downto 0);
+    signal mlz_b, mlz_c, mlz_d, mlz_e, mlz_g, mlz_h: std_logic;
+    signal mlz_f: std_logic_vector(3 downto 0);
+
+    --instruction memory
+    signal ins_mem_ad, ins_mem_edb: std_logic_vector(15 downto 0);
+
+    --fetch stage
+    signal fpc_in, fmem_in, fp1_instr_in, fm_next: std_logic_vector(15 downto 0);
+    signal fpc, fpcplus1, fbrloc, fbrlocplus1, fmem_out: std_logic_vector(15 downto 0);
+    signal fp1_en, f_cout1, f_cout2: std_logic;
+    signal fmux_en : std_logic_vector(2 downto 0);
 
 begin
+    -----------------------------------------------------------------
+    --Instruction Memory
+    -----------------------------------------------------------------
+    ins_mem_ad <= fmem_in;
+    --
+    instrmemry: InstructionMemory port map(ins_mem_ad, ins_mem_edb, clk, rst);
     -----------------------------------------------------------------
     --Data Hazard Detector
     -----------------------------------------------------------------
     dhd_ex_rfw <= erfw_d;
     dhd_ex_stall <= p3_stall_out;
-    --dhd_mem_rfw <=
-    --dhd_mem_stall <=
-    --dhd_wb_rfw <=
-    --dhd_wb_stall <=
+    dhd_mem_rfw <= p4_rfw_out;
+    dhd_mem_stall <= p4_stall_out;
+    dhd_wb_rfw <= p5_rfw_out;
+    dhd_wb_stall <= p5_stall_out;
     dhd_rr_rs1 <= p2_rs1_out;
     dhd_rr_rs2 <= p2_rs2_out;
     dhd_ex_rd <= p3_rd_out;
-    --dhd_mem_rd <=
-    --dhd_wb_rd <=
+    dhd_mem_rd <= p4_rd_out;
+    dhd_wb_rd <= p5_rd_out;
     dhd_rr_data1 <= d1;
     dhd_rr_data2 <= d2;
-    dhd_ex_data <= rdd_d;
-    --dhd_mem_data <=
-    --dhd_wb_data <=
+    dhd_ex_data <= p4_rd_data_in;
+    dhd_mem_data <= p5_rd_data_in;
+    dhd_wb_data <= p5_rd_data_out;
 
     --
     dhdetector: DHD port map(dhd_ex_rfw, dhd_ex_stall, dhd_mem_rfw, dhd_mem_stall,
@@ -170,11 +214,11 @@ begin
     brn_d <= dbn_f;
     brn_r <=rbn_k;
     brn_e <=ebn_k;
-    --brn_m <=
+    brn_m <= mbn_f;
     brl_d <= dbl_h;
     brl_r <=rbl_g;
     brl_e <=ebr_loc;
-    --brl_m <=
+    brl_m <= mbr_loc;
 
     --
     chdetector:ControlHazardDetector port map(brl_out, brn_out, st_d_out, st_e_out, st_r_out,
@@ -197,22 +241,54 @@ begin
     -----------------------------------------------------------------
     --Register File
     -----------------------------------------------------------------
-    --rfw <=
-    --pcw <=
+    rfw <= p5_rfw_out and (not p5_stall_out); --
+    pcw <= '1'; --really?
     a1 <= p2_rs1_out;
     a2 <= p2_rs2_out;
-    --a3 <=
-    --d3<=
+    a3 <= p5_rd_out;
+    d3<= p5_rd_data_out;
 
     --
     regfile: RF port map(rfw, pcw, a1, a2, a3, d3, pc_in, d1, d2, pc_out, rst, clk);
 
     -----------------------------------------------------------------
+    --Data Memory
+    -----------------------------------------------------------------
+    memw <= (not p4_stall_out) and p4_mw_out;
+    memr <= (not p4_stall_out) and p4_mr_out;
+    mem_ad <= p4_memloc_out;
+    mem_dat <= p4_memdat_out;
+
+    --
+    datamem: Memory port map (memw, memr, mem_ad, mem_dat, mem_edb, clk, rst);
+
+    -----------------------------------------------------------------
+    --Fetch Stage
+    -----------------------------------------------------------------
+    fmux_en <= md_flg & lh_flag & brn_out;
+    fm_next <= md_new_ins;
+    fpc <= pc_out;
+    asdmn: SixteenBitAdder port map (fpc,(0=>'1', others => '0'), fpcplus1, f_cout1);
+    fbrloc <= brl_out;
+    as1dmn: SixteenBitAdder port map (fbrloc,(0=>'1', others => '0'), fbrlocplus1, f_cout2);
+    fmem_out <= ins_mem_edb;
+
+    --
+    muxpcin: MuxEight port map(fpcplus1,fbrlocplus1,fpc,fbrlocplus1,fpc,fbrlocplus1,fpc,
+                    fbrlocplus1,fmux_en,fpc_in);
+    muxmemin: MuxEight port map(fpc,fbrloc,fpc,fbrloc,fpc,fbrloc,fpc,fbrloc,fmux_en,fmem_in);
+    muxp1insin: MuxEight port map(fmem_out,fmem_out,fmem_out,fmem_out,fm_next,fmem_out
+                    ,fmem_out,fmem_out,fmux_en,fp1_instr_in);
+
+    fp1_en <= '0' when lh_flag = '1' and brn_out = '0' else '1';
+
+
+    -----------------------------------------------------------------
     --Pipeline Register P1
     -----------------------------------------------------------------
-    p1_enable <= not lh_flag;
-    --p1_instr_in <=
-    --p1_pc_in <=
+    p1_enable <= fp1_en;
+    p1_instr_in <= fp1_instr_in;
+    p1_pc_in <= fmem_in;
     process(clk,rst)
     begin
         if(clk'event and (clk  = '1')) then
@@ -426,7 +502,7 @@ begin
     end process;
 
     -----------------------------------------------------------------
-    --Execute Read Stage
+    --Execute Stage
     -----------------------------------------------------------------
     --alu--
     alux <= p3_rs1_data_out;
@@ -447,8 +523,8 @@ begin
 
     --flag decoder--
     ef_instr <= p3_instr_out;
-    --ef_o_z <=
-    --ef_o_c <=
+    ef_o_z <= p5_z_in;
+    ef_o_c <= p5_c_in;
     ef_stall <= p3_stall_out or st_e_out;
     ef_in_z <= aluz;
     ef_in_c <= aluc;
@@ -546,5 +622,96 @@ begin
         end if;
     end process;
 
+    -----------------------------------------------------------------
+    --Memory Access stage
+    -----------------------------------------------------------------
+    --branch location--
+    mbr_loc <= mem_edb;
 
+    --branch now--
+    mbn_a <= p4_br_st_out;
+    mbn_c <= p4_branch_out;
+    mbn_e <= not p4_stall_out;
+    --
+    mbn_b <= '1' when mbn_a = "11" else '0';
+    mbn_d <= mbn_b and mbn_c;
+    mbn_f <= mbn_d and mbn_e;
+
+    --load zero flag--
+    mlz_a <= p5_rd_data_in;
+    mlz_b <= '0';
+    mlz_f <= p4_instr_out(15 downto 12);
+    mlz_e <= not p4_stall_out;
+    --
+    mlz_g <= '1' when mlz_a = "0000000000000000" else '0';
+    mlz_c <= (mlz_g and mlz_d) or (mlz_b and not mlz_d);
+    mlz_d <= mlz_h and mlz_e;
+    mlz_h <= '1' when mlz_f = "0100" else '0';
+
+    -----------------------------------------------------------------
+    --Pipeline Register p5
+    -----------------------------------------------------------------
+    p5_instr_in <= p4_instr_out;
+    p5_pc_in <= p4_pc_out;
+    p5_stall_in <= p4_stall_out;
+    p5_branch_in <= p4_branch_out;
+    p5_mr_in <= p4_mr_out;
+    p5_mw_in <= p4_mw_out;
+    p5_rfw_in <= p4_rfw_out;
+    p5_rs1_in <= p4_rs1_out;
+    p5_rs2_in <= p4_rs2_out;
+    p5_rd_in <= p4_rd_out;
+    p5_br_st_in <= p4_br_st_out;
+    p5_rs1_data_in <= p4_rs1_data_out;
+    p5_rs2_data_in <= p4_rs2_data_out;
+    p5_memloc_in <= p4_memloc_out;
+    p5_memdat_in <= p4_memdat_out;
+    p5_rd_data_in <= mem_edb when memw = '1' else p4_rd_data_out;
+    p5_z_in <= mlz_c;
+    p5_c_in <= p4_c_out;
+    process(clk,rst)
+    begin
+        if(clk'event and (clk  = '1')) then
+            if(p5_enable = '1') then
+                p5_instr_out <= p5_instr_in;
+                p5_pc_out <= p5_pc_in;
+                p5_stall_out <= p5_stall_in;
+                p5_branch_out <= p5_branch_in;
+                p5_mr_out <= p5_mr_in;
+                p5_mw_out <= p5_mw_in;
+                p5_rfw_out <= p5_rfw_in;
+                p5_rs1_out <= p5_rs1_in;
+                p5_rs2_out <= p5_rs2_in;
+                p5_rd_out <= p5_rd_in;
+                p5_br_st_out <= p5_br_st_in;
+                p5_rs1_data_out <= p5_rs1_data_in;
+                p5_rs2_data_out <= p5_rs2_data_in;
+                p5_memloc_out <= p5_memloc_in;
+                p5_memdat_out <= p5_memdat_in;
+                p5_rd_data_out <= p5_rd_data_in;
+                p5_z_out <= p5_z_in;
+                p5_c_out <= p5_c_in;
+            end if;
+            if(rst = '1') then
+                p5_instr_out <= (others => '0');
+                p5_pc_out <= (others => '0');
+                p5_stall_out <= '1';
+                p5_branch_out <= '0';
+                p5_mr_out <= '0';
+                p5_mw_out <= '0';
+                p5_rfw_out <= '0';
+                p5_rs1_out <= (others => '0');
+                p5_rs2_out <= (others => '0');
+                p5_rd_out <= (others => '0');
+                p5_br_st_out <= (others => '0');
+                p5_rs1_data_out <= (others => '0');
+                p5_rs2_data_out <= (others => '0');
+                p5_memloc_out <= (others => '0');
+                p5_memdat_out <= (others => '0');
+                p5_rd_data_out <= (others => '0');
+                p5_z_out <= '0';
+                p5_c_out <= '0';
+            end if;
+        end if;
+    end process;
 end Mixed;

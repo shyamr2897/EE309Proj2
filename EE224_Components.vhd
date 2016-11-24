@@ -215,5 +215,12 @@ package EE224_Components is
             data1_out, data2_out: out std_logic_vector(15 downto 0)	      
             );
     end component;
+
+    component InstructionMemory is
+        port(
+            Mem_ad: in std_logic_vector (15 downto 0);
+            edb: out std_logic_vector(15 downto 0);
+            clk,rst: in std_logic);
+    end component;
 end EE224_Components;
 
