@@ -15,10 +15,10 @@ begin
     process(instr, in_rfw, condition)
         variable x_out_rfw: std_logic;
     begin
-        if(instr(15 downto 12) /= "0000" and instr(15 downto 12) /= "0010") then
-            x_out_rfw := in_rfw;
-        else
+        if(instr(15 downto 12) = "0000" or instr(15 downto 12) = "0010") then
             x_out_rfw := in_rfw and condition;
+        else
+            x_out_rfw := in_rfw;
         end if;
         out_rfw <= x_out_rfw;
     end process;

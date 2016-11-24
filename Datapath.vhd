@@ -14,7 +14,7 @@ architecture Mixed of Datapath is
     signal p1_instr_out, p1_instr_in, p1_pc_out, p1_pc_in: std_logic_vector(15 downto 0);
     signal p1_enable, p1_stall_out: std_logic;
 
-    --register P1
+    --register P2
     signal p2_instr_out, p2_instr_in, p2_pc_out, p2_pc_in: std_logic_vector(15 downto 0);
     signal p2_enable, p2_stall_out, p2_stall_in, p2_branch_in, p2_branch_out,
             p2_rr_br_loc_in, p2_rr_br_loc_out, p2_mr_in, p2_mr_out,
@@ -23,7 +23,32 @@ architecture Mixed of Datapath is
             : std_logic_vector(2 downto 0);
     signal p2_br_st_in, p2_br_st_out: std_logic_vector (1 downto 0);
 
+    --register P3
+    signal p3_instr_out, p3_instr_in, p3_pc_out, p3_pc_in,
+            p3_rs1_data_out, p3_rs2_data_out, p3_rs1_data_in, p3_rs2_data_in,
+            p3_memloc_in, p3_memloc_out, p3_memdat_in,
+            p3_memdat_out: std_logic_vector(15 downto 0);
+    signal p3_enable, p3_stall_out, p3_stall_in, p3_branch_in, p3_branch_out,
+            p3_rr_br_loc_in, p3_rr_br_loc_out, p3_mr_in, p3_mr_out,
+            p3_mw_in, p3_mw_out, p3_rfw_in, p3_rfw_out: std_logic;
+    signal p3_rs1_in, p3_rs1_out, p3_rs2_in, p3_rs2_out, p3_rd_in, p3_rd_out
+            : std_logic_vector(2 downto 0);
+    signal p3_br_st_in, p3_br_st_out: std_logic_vector (1 downto 0);
 
+         --register p4
+    signal p4_instr_out, p4_instr_in, p4_pc_out, p4_pc_in,
+            p4_rs1_data_out, p4_rs2_data_out, p4_rs1_data_in, p4_rs2_data_in,
+            p4_memloc_in, p4_memloc_out, p4_memdat_in,
+            p4_memdat_out, p4_rd_data_in, p4_rd_data_out: std_logic_vector(15 downto 0);
+    signal p4_enable, p4_stall_out, p4_stall_in, p4_branch_in, p4_branch_out,
+            p4_rr_br_loc_in, p4_rr_br_loc_out, p4_mr_in, p4_mr_out,
+            p4_mw_in, p4_mw_out, p4_rfw_in, p4_rfw_out, p4_c_in, p4_c_out,
+            p4_z_in,p4_z_out: std_logic;
+    signal p4_rs1_in, p4_rs1_out, p4_rs2_in, p4_rs2_out, p4_rd_in, p4_rd_out
+            : std_logic_vector(2 downto 0);
+    signal p4_br_st_in, p4_br_st_out: std_logic_vector (1 downto 0);
+
+    --instruction decoder
     signal id_ins: std_logic_vector(15 downto 0);
     signal id_mdr, id_rs1, id_rs2, id_rd: std_logic_vector (2 downto 0);
     signal id_branch, id_dec_brloc, id_rr_brloc, id_mr, id_mw, id_rfw: std_logic;
@@ -88,24 +113,49 @@ architecture Mixed of Datapath is
     signal a1, a2, a3: std_logic_vector( 2 downto 0);
     signal d3, pc_in, d1, d2, pc_out: std_logic_vector(15 downto 0);
 
+    --alu
+    signal alux, aluy, alus, alu_ext, alupad: std_logic_vector(15 downto 0);
+    signal aluop: std_logic_vector (1 downto 0);
+    signal aluc, aluz : std_logic;
+
+    --execute rd data
+    signal rdd_a, rdd_b, rdd_d: std_logic_vector(15 downto 0);
+    signal rdd_c: std_logic;
+
+    --flag decoder
+    signal ef_instr:  std_logic_vector(15 downto 0);
+    signal ef_o_z, ef_o_c, ef_stall,ef_in_z, ef_in_c: std_logic;
+    signal ef_n_z,ef_n_c,ef_condition:  std_logic;
+
+    --rfw decoder
+    signal erfw_a : std_logic_vector (15 downto 0);
+    signal erfw_b, erfw_c, erfw_d : std_logic;
+    --execute branch location
+    signal ebr_loc: std_logic_vector (15 downto 0);
+
+    --execute branch now
+    signal ebn_a, ebn_b, ebn_c, ebn_d, ebn_f, ebn_g, ebn_h, ebn_i, ebn_j, ebn_k: std_logic;
+    signal ebn_e: std_logic_vector (1 downto 0);
+
+
 begin
     -----------------------------------------------------------------
     --Data Hazard Detector
     -----------------------------------------------------------------
-    --dhd_ex_rfw <=
-    --dhd_ex_stall <=
+    dhd_ex_rfw <= erfw_d;
+    dhd_ex_stall <= p3_stall_out;
     --dhd_mem_rfw <=
     --dhd_mem_stall <=
     --dhd_wb_rfw <=
     --dhd_wb_stall <=
-    --dhd_rr_rs1 <=
-    --dhd_rr_rs2 <=
-    --dhd_ex_rd <=
+    dhd_rr_rs1 <= p2_rs1_out;
+    dhd_rr_rs2 <= p2_rs2_out;
+    dhd_ex_rd <= p3_rd_out;
     --dhd_mem_rd <=
     --dhd_wb_rd <=
-    --dhd_rr_data1 <=
-    --dhd_rr_data2
-    --dhd_ex_data <=
+    dhd_rr_data1 <= d1;
+    dhd_rr_data2 <= d2;
+    dhd_ex_data <= rdd_d;
     --dhd_mem_data <=
     --dhd_wb_data <=
 
@@ -117,14 +167,14 @@ begin
     -----------------------------------------------------------------
     --Control Hazard Detector
     -----------------------------------------------------------------
-    --brn_d <=
-    --brn_r <=
-    --brn_e <=
+    brn_d <= dbn_f;
+    brn_r <=rbn_k;
+    brn_e <=ebn_k;
     --brn_m <=
-    --brl_d <=
-    --brl_r <=
-    --brl_e <=
-    --brl_m
+    brl_d <= dbl_h;
+    brl_r <=rbl_g;
+    brl_e <=ebr_loc;
+    --brl_m <=
 
     --
     chdetector:ControlHazardDetector port map(brl_out, brn_out, st_d_out, st_e_out, st_r_out,
@@ -132,13 +182,13 @@ begin
     -----------------------------------------------------------------
     --Load Hazard Detector
     -----------------------------------------------------------------
-    --lh_ins_d <=
-    --lh_ins_r <=
-    --lh_rs1d <=
-    --lh_rs2d <=
-    --lh_rdr <=
-    --lh_d_st <=
-    --lh_r_st <=
+    lh_ins_d <= p1_instr_out;
+    lh_ins_r <= p2_instr_out;
+    lh_rs1d <= p2_rs1_in;
+    lh_rs2d <= p2_rs2_in;
+    lh_rdr <= p2_rd_out;
+    lh_d_st <= p1_stall_out;
+    lh_r_st <= p2_stall_out;
 
     --
     lhdetector:LoadHazard port map (lh_ins_d, lh_ins_r, lh_rs1d,
@@ -149,8 +199,8 @@ begin
     -----------------------------------------------------------------
     --rfw <=
     --pcw <=
-    --a1 <=
-    --a2 <=
+    a1 <= p2_rs1_out;
+    a2 <= p2_rs2_out;
     --a3 <=
     --d3<=
 
@@ -160,7 +210,10 @@ begin
     -----------------------------------------------------------------
     --Pipeline Register P1
     -----------------------------------------------------------------
-    process(clk)
+    p1_enable <= not lh_flag;
+    --p1_instr_in <=
+    --p1_pc_in <=
+    process(clk,rst)
     begin
         if(clk'event and (clk  = '1')) then
             if(p1_enable = '1') then
@@ -215,9 +268,10 @@ begin
     -----------------------------------------------------------------
     --Pipeline Register P2
     -----------------------------------------------------------------
+    p2_enable <= '1';
     p2_instr_in <= p1_instr_out;
     p2_pc_in <= p1_pc_out;
-    --p2_stall_in <=
+    p2_stall_in <= lh_flag or p1_stall_out or st_d_out;
     p2_branch_in <= id_branch;
     p2_rr_br_loc_in <= id_rr_brloc;
     p2_mr_in <= id_mr;
@@ -227,7 +281,7 @@ begin
     p2_rs2_in <= id_rs2;
     p2_rd_in <= id_rd;
     p2_br_st_in <= id_br_st;
-    process(clk)
+    process(clk,rst)
     begin
         if(clk'event and (clk  = '1')) then
             if(p2_enable = '1') then
@@ -265,8 +319,8 @@ begin
     --Register Read Stage
     -----------------------------------------------------------------
     --branch now--
-    --rbn_a <=
-    --rbn_b <=
+    rbn_a <= dhd_data1_out;
+    rbn_b <= dhd_data2_out;
     rbn_e <= p2_br_st_out;
     rbn_h <= p2_branch_out;
     rbn_j <= not p2_stall_out;
@@ -282,7 +336,7 @@ begin
     --branch location--
     rbl_a <= p2_pc_out;
     rbl_b <= p2_instr_out(5 downto 0);
-    --rbl_e <=
+    rbl_e <= dhd_data2_out;
     rbl_f <= p2_rr_br_loc_out;
     --
     rse: SixBitSignExtender port map (rbl_b, rbl_c);
@@ -290,8 +344,8 @@ begin
     rm21: MuxTwo port map(rbl_d, rbl_e, rbl_f, rbl_g);
 
     --M memory location--
-    --rm_a <=
-    --rm_b <=
+    rm_a <= p3_memloc_out;
+    rm_b <= dhd_data1_out;
     rm_d <= p2_instr_out (15 downto 13);
     rm_e <= "111";
     --
@@ -301,11 +355,196 @@ begin
 
     --W memory location--
     rw_a <= p2_instr_out (5 downto 0);
-    --rw_c <=
+    rw_c <= dhd_data2_out;
     --
     rwlocse: SixBitSignExtender port map (rw_a, rw_b);
     rwadder: SixteenBitAdder port map (rw_b, rw_c, rw_d, rw_cout);
 
     --actual memory location--
     rwactual: MuxTwo port map(rw_d, rm_g, p2_instr_out(13), rmemloc);
+
+    --memory data--
+    rmemdata <= dhd_data2_out;
+
+    -----------------------------------------------------------------
+    --Pipeline Register p3
+    -----------------------------------------------------------------
+    p3_enable <= '1';
+    p3_instr_in <= p2_instr_out;
+    p3_pc_in <= p2_pc_out;
+    p3_stall_in <= p2_stall_out or st_r_out;
+    p3_branch_in <= p2_branch_out;
+    p3_mr_in <= p2_mr_out;
+    p3_mw_in <= p2_mw_out;
+    p3_rfw_in <= p2_rfw_out;
+    p3_rs1_in <= p2_rs1_out;
+    p3_rs2_in <= p2_rs2_out;
+    p3_rd_in <= p3_rd_out;
+    p3_br_st_in <= p2_br_st_in;
+    p3_rs1_data_in <= dhd_data1_out;
+    p3_rs2_data_in <= dhd_data2_out;
+    p3_memloc_in <= rmemloc;
+    p3_memdat_in <= rmemdata;
+    process(clk,rst)
+    begin
+        if(clk'event and (clk  = '1')) then
+            if(p3_enable = '1') then
+                p3_instr_out <= p3_instr_in;
+                p3_pc_out <= p3_pc_in;
+                p3_stall_out <= p3_stall_in;
+                p3_branch_out <= p3_branch_in;
+                p3_mr_out <= p3_mr_in;
+                p3_mw_out <= p3_mw_in;
+                p3_rfw_out <= p3_rfw_in;
+                p3_rs1_out <= p3_rs1_in;
+                p3_rs2_out <= p3_rs2_in;
+                p3_rd_out <= p3_rd_in;
+                p3_br_st_out <= p3_br_st_in;
+                p3_rs1_data_out <= p3_rs1_data_in;
+                p3_rs2_data_out <= p3_rs2_data_in;
+                p3_memloc_out <= p3_memloc_in;
+                p3_memdat_out <= p3_memdat_in;
+            end if;
+            if(rst = '1') then
+                p3_instr_out <= (others => '0');
+                p3_pc_out <= (others => '0');
+                p3_stall_out <= '1';
+                p3_branch_out <= '0';
+                p3_mr_out <= '0';
+                p3_mw_out <= '0';
+                p3_rfw_out <= '0';
+                p3_rs1_out <= (others => '0');
+                p3_rs2_out <= (others => '0');
+                p3_rd_out <= (others => '0');
+                p3_br_st_out <= (others => '0');
+                p3_rs1_data_out <= (others => '0');
+                p3_rs2_data_out <= (others => '0');
+                p3_memloc_out <= (others => '0');
+                p3_memdat_out <= (others => '0');
+            end if;
+        end if;
+    end process;
+
+    -----------------------------------------------------------------
+    --Execute Read Stage
+    -----------------------------------------------------------------
+    --alu--
+    alux <= p3_rs1_data_out;
+    aluy <= p3_rs2_data_out when p3_instr_out(12) = '0' else alu_ext;
+    aluop <= p3_instr_out(13) & '0';
+    exexse2: SixBitSignExtender port map(p3_instr_out(5 downto 0), alu_ext);
+    --
+    execalu: ALU port map(alux, aluy,aluop,alus,aluc,aluz);
+
+    --rd_data--
+    execpadlh: PadNine port map (p3_instr_out(8 downto 0), alupad);
+    rdd_a <= alupad when p3_instr_out(15 downto 12) = "0011" else alus;
+    rdd_b <= p3_pc_out;
+    rdd_c <= '1' when p3_instr_out(15 downto 12) = "0000" or p3_instr_out(15 downto 12) = "0001"
+                    or p3_instr_out(15 downto 12) = "0010" or
+                    p3_instr_out(15 downto 12) = "0011" else '0';
+    rdexmux: MuxTwo port map(rdd_b, rdd_a, rdd_c, rdd_d);
+
+    --flag decoder--
+    ef_instr <= p3_instr_out;
+    --ef_o_z <=
+    --ef_o_c <=
+    ef_stall <= p3_stall_out or st_e_out;
+    ef_in_z <= aluz;
+    ef_in_c <= aluc;
+    --
+    execflagdec:FlagDecoder port map
+    (ef_instr, ef_o_z, ef_o_c, ef_stall, ef_in_z, ef_in_c, ef_n_z,ef_n_c, ef_condition);
+
+    --rfw decoder--
+    erfw_a <= p3_instr_out;
+    erfw_b <= p3_rfw_out;
+    erfw_c <= ef_condition;
+    --
+    erfdeco: RFW_Decoder port map (erfw_a, erfw_b, erfw_c, erfw_d);
+
+    --branch location--
+    ebr_loc <= rdd_d;
+
+    --branch now--
+    ebn_a <= ef_condition;
+    ebn_e <= p3_br_st_out;
+    ebn_h <= p3_branch_out;
+    ebn_j <= not p3_stall_out;
+    --
+    ebn_d <= '1' when ebn_c = '1' else ebn_a;
+    ebn_f <= '1' when ebn_e = "10" else '0';
+    ebn_g <= ebn_f and ebn_d;
+    ebn_i <= ebn_g and ebn_h;
+    ebn_k <= ebn_i and ebn_j;
+
+    -----------------------------------------------------------------
+    --Pipeline Register p4
+    -----------------------------------------------------------------
+    p4_enable <= '1';
+    p4_instr_in <= p3_instr_out;
+    p4_pc_in <= p3_pc_out;
+    p4_stall_in <= p3_stall_out or st_e_out;
+    p4_branch_in <= p3_branch_out;
+    p4_mr_in <= p3_mr_out;
+    p4_mw_in <= p3_mw_out;
+    p4_rfw_in <= erfw_d;
+    p4_rs1_in <= p3_rs1_out;
+    p4_rs2_in <= p3_rs2_out;
+    p4_rd_in <= p3_rd_out;
+    p4_br_st_in <= p3_br_st_out;
+    p4_rs1_data_in <= p3_rs1_data_out;
+    p4_rs2_data_in <= p3_rs2_data_out;
+    p4_memloc_in <= p3_memloc_out;
+    p4_memdat_in <= p3_memdat_out;
+    p4_rd_data_in <= rdd_d;
+    p4_z_in <= ef_n_z;
+    p4_c_in <= ef_n_c;
+    process(clk,rst)
+    begin
+        if(clk'event and (clk  = '1')) then
+            if(p4_enable = '1') then
+                p4_instr_out <= p4_instr_in;
+                p4_pc_out <= p4_pc_in;
+                p4_stall_out <= p4_stall_in;
+                p4_branch_out <= p4_branch_in;
+                p4_mr_out <= p4_mr_in;
+                p4_mw_out <= p4_mw_in;
+                p4_rfw_out <= p4_rfw_in;
+                p4_rs1_out <= p4_rs1_in;
+                p4_rs2_out <= p4_rs2_in;
+                p4_rd_out <= p4_rd_in;
+                p4_br_st_out <= p4_br_st_in;
+                p4_rs1_data_out <= p4_rs1_data_in;
+                p4_rs2_data_out <= p4_rs2_data_in;
+                p4_memloc_out <= p4_memloc_in;
+                p4_memdat_out <= p4_memdat_in;
+                p4_rd_data_out <= p4_rd_data_in;
+                p4_z_out <= p4_z_in;
+                p4_c_out <= p4_c_in;
+            end if;
+            if(rst = '1') then
+                p4_instr_out <= (others => '0');
+                p4_pc_out <= (others => '0');
+                p4_stall_out <= '1';
+                p4_branch_out <= '0';
+                p4_mr_out <= '0';
+                p4_mw_out <= '0';
+                p4_rfw_out <= '0';
+                p4_rs1_out <= (others => '0');
+                p4_rs2_out <= (others => '0');
+                p4_rd_out <= (others => '0');
+                p4_br_st_out <= (others => '0');
+                p4_rs1_data_out <= (others => '0');
+                p4_rs2_data_out <= (others => '0');
+                p4_memloc_out <= (others => '0');
+                p4_memdat_out <= (others => '0');
+                p4_rd_data_out <= (others => '0');
+                p4_z_out <= '0';
+                p4_c_out <= '0';
+            end if;
+        end if;
+    end process;
+
+
 end Mixed;
