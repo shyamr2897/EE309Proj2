@@ -37,6 +37,8 @@ begin
 		ex_data_a := ex_data ;
 		mem_data_a := mem_data ;
 		wb_data_a := wb_data ;
+        data1_out_a := (others => '0');
+        data2_out_a := (others => '0');
 		if (ex_pot = '1') then
 		    if (ex_rd_a = rr_rs1_a) then
 			data1_out_a := ex_data_a;

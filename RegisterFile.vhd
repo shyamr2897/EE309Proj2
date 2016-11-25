@@ -9,6 +9,7 @@ entity RF is
         A1,A2,A3: in std_logic_vector (2 downto 0);
         D3,PC_in: in std_logic_vector(15 downto 0);
         D1,D2,PC_out: out std_logic_vector(15 downto 0);
+        R0,R1,R2,R3,R4,R5,R6,R7: out std_logic_vector(15 downto 0);
         rst, clk: in std_logic);
 end entity;
 
@@ -17,6 +18,14 @@ architecture Struct of RF is
     signal R_enable : std_logic_vector (7 downto 0);
 
 begin
+    R0 <= R_out(0);
+    R1 <= R_out(1);
+    R2 <= R_out(2);
+    R3 <= R_out(3);
+    R4 <= R_out(4);
+    R5 <= R_out(5);
+    R6 <= R_out(6);
+    R7 <= R_out(7);
     --Read related logic
     D1 <= R_out(0) when A1 = "000" else
         R_out(1) when A1 = "001" else
@@ -45,7 +54,7 @@ begin
     ----------------------
     R_in(0) <= (1 => '1', 2 => '1', 5 => '1', 6 => '1', others => '0') when rst = '1' else D3;
     R_enable(0) <= (RF_write and ( not(A3(2)) and not(A3(1)) and not(A3(0)) )) or rst;
-    R0: DataRegister
+    Reg0: DataRegister
              generic map (data_width => 16)
              port map (
 			 Din => R_in(0), Dout => R_out(0),
@@ -56,7 +65,7 @@ begin
     ----------------------
     R_in(1) <= "0000000000000001" when rst = '1' else D3;
     R_enable(1) <= (RF_write and ( not(A3(2)) and not(A3(1)) and A3(0) )) or rst;
-    R1: DataRegister
+    Reg1: DataRegister
              generic map (data_width => 16)
              port map (
 			 Din => R_in(1), Dout => R_out(1),
@@ -68,7 +77,7 @@ begin
     ----------------------
     R_in(2) <= "0000000000000010"  when rst = '1' else D3;
     R_enable(2) <= (RF_write and ( not(A3(2)) and A3(1) and not(A3(0)) )) or rst;
-    R2: DataRegister
+    Reg2: DataRegister
              generic map (data_width => 16)
              port map (
 			 Din => R_in(2), Dout => R_out(2),
@@ -79,7 +88,7 @@ begin
     ----------------------
     R_in(3) <= "0000000000000011" when rst = '1' else D3;
     R_enable(3) <= (RF_write and ( not(A3(2)) and A3(1) and A3(0) )) or rst;
-    R3: DataRegister
+    Reg3: DataRegister
              generic map (data_width => 16)
              port map (
 			 Din => R_in(3), Dout => R_out(3),
@@ -90,7 +99,7 @@ begin
     ----------------------
     R_in(4) <= "0000000000000100" when rst = '1' else D3;
     R_enable(4) <= (RF_write and ( A3(2) and not(A3(1)) and not(A3(0)) )) or rst;
-    R4: DataRegister
+    Reg4: DataRegister
              generic map (data_width => 16)
              port map (
 			 Din => R_in(4), Dout => R_out(4),
@@ -101,7 +110,7 @@ begin
     ----------------------
     R_in(5) <= "0000000000000101" when rst = '1' else D3;
     R_enable(5) <= (RF_write and ( A3(2) and not(A3(1)) and A3(0) )) or rst;
-    R5: DataRegister
+    Reg5: DataRegister
              generic map (data_width => 16)
              port map (
 			 Din => R_in(5), Dout => R_out(5),
@@ -112,7 +121,7 @@ begin
     ----------------------
     R_in(6) <= "0000000000000110" when rst = '1' else D3;
     R_enable(6) <= (RF_write and ( A3(2) and A3(1) and not(A3(0)) )) or rst;
-    R6: DataRegister
+    Reg6: DataRegister
              generic map (data_width => 16)
              port map (
 			 Din => R_in(6), Dout => R_out(6),
@@ -123,7 +132,7 @@ begin
     ----------------------
     R_in(7) <= (others => '0') when rst = '1' else PC_in when PC_write = '1' else D3;
     R_enable(7) <= (PC_write or (  RF_write and ( A3(2) and A3(1) and A3(0))  )) or rst;
-    R7: DataRegister
+    Reg7: DataRegister
              generic map (data_width => 16)
              port map (
 			 Din => R_in(7), Dout => R_out(7),

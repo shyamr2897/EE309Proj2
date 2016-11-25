@@ -10,14 +10,14 @@ end entity;
 architecture Behave of Testbench_Datapath is
 
     component Datapath is
-        port (
-
-            clk, rst: in std_logic
-	     );
+        port(
+        R0,R1,R2,R3,R4,R5,R6,R7: out std_logic_vector(15 downto 0);
+        clk,rst: in std_logic);
     end component;
 
   signal clk: std_logic := '0';
   signal rst: std_logic;
+  signal Ro0,Ro1,Ro2,Ro3,Ro4,Ro5,Ro6,Ro7: std_logic_vector(15 downto 0);
   
 
   function to_string(x: string) return string is
@@ -69,8 +69,8 @@ begin
 
 
   dut: Datapath
-     port map(clk => clk,
-              rst => rst);
+     port map(
+     R0 => Ro0, R1 => Ro1, R2 => Ro2, R3 => Ro3, R4 => Ro4, R5 => Ro5,R6=>Ro6,R7=> Ro7,
+      clk => clk, rst => rst);
 
 end Behave;
-

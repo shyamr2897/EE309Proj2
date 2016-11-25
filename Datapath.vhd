@@ -6,10 +6,12 @@ use work.EE224_Components.all;
 
 entity Datapath is
     port(
+        R0,R1,R2,R3,R4,R5,R6,R7: out std_logic_vector(15 downto 0);
         clk,rst: in std_logic);
 end entity;
 
 architecture Mixed of Datapath is
+    --signal R0,R1,R2,R3,R4,R5,R6,R7: std_logic_vector(15 downto 0);
     --register P1
     signal p1_instr_out, p1_instr_in, p1_pc_out, p1_pc_in: std_logic_vector(15 downto 0);
     signal p1_enable, p1_stall_out: std_logic;
@@ -250,7 +252,8 @@ begin
     pc_in <= fpc_in;
 
     --
-    regfile: RF port map(rfw, pcw, a1, a2, a3, d3, pc_in, d1, d2, pc_out, rst, clk);
+    regfile: RF port map(rfw, pcw, a1, a2, a3, d3, pc_in, d1, d2, pc_out,
+                    R0,R1,R2,R3,R4,R5,R6,R7,rst,clk);
 
     -----------------------------------------------------------------
     --Data Memory
@@ -546,6 +549,7 @@ begin
 
     --branch now--
     ebn_a <= ef_condition;
+    ebn_c <= p3_instr_out(12);  --suspect
     ebn_e <= p3_br_st_out;
     ebn_h <= p3_branch_out;
     ebn_j <= not p3_stall_out;

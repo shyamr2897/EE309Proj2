@@ -27,6 +27,7 @@ begin
        x_execute_stall := '0';
        x_regread_stall := '0';
        x_output_branch_now := '0';
+       x_output_branch_loc := (others => '0');
 
        if decode_branch_now='1' then
        x_output_branch_loc := decode_branch_loc;  

@@ -64,36 +64,40 @@ begin
     process(clk,Mem_write,rst)
     begin
         if(clk'event and (clk  = '1') and rst = '0') then
-            if(Mem_write = '1' and (ad_of_msb(0) = '0' or ad_of_msb(0) = '1') and
-                            (ad_of_msb(1) = '0' or ad_of_msb(1) = '1') and
-                            (ad_of_msb(2) = '0' or ad_of_msb(2) = '1') and
-                            (ad_of_msb(3) = '0' or ad_of_msb(3) = '1') and
-                            (ad_of_msb(4) = '0' or ad_of_msb(4) = '1') and
-                            (ad_of_msb(5) = '0' or ad_of_msb(5) = '1') and
-                            (ad_of_msb(6) = '0' or ad_of_msb(6) = '1') and
-                            (ad_of_msb(7) = '0' or ad_of_msb(7) = '1') and
-                            (ad_of_lsb(0) = '0' or ad_of_lsb(0) = '1') and
-                            (ad_of_lsb(1) = '0' or ad_of_lsb(1) = '1') and
-                            (ad_of_lsb(2) = '0' or ad_of_lsb(2) = '1') and
-                            (ad_of_lsb(3) = '0' or ad_of_lsb(3) = '1') and
-                            (ad_of_lsb(4) = '0' or ad_of_lsb(4) = '1') and
-                            (ad_of_lsb(5) = '0' or ad_of_lsb(5) = '1') and
-                            (ad_of_lsb(6) = '0' or ad_of_lsb(6) = '1') and
-                            (ad_of_lsb(7) = '0' or ad_of_lsb(7) = '1')) then
-                mem_byte(to_integer(unsigned(ad_of_lsb))) <= Mem_dat(7 downto 0);
-                mem_byte(to_integer(unsigned(ad_of_msb))) <= Mem_dat(15 downto 8);
+            if(rst = '0') then
+                if(Mem_write = '1' and (ad_of_msb(0) = '0' or ad_of_msb(0) = '1') and
+                                (ad_of_msb(1) = '0' or ad_of_msb(1) = '1') and
+                                (ad_of_msb(2) = '0' or ad_of_msb(2) = '1') and
+                                (ad_of_msb(3) = '0' or ad_of_msb(3) = '1') and
+                                (ad_of_msb(4) = '0' or ad_of_msb(4) = '1') and
+                                (ad_of_msb(5) = '0' or ad_of_msb(5) = '1') and
+                                (ad_of_msb(6) = '0' or ad_of_msb(6) = '1') and
+                                (ad_of_msb(7) = '0' or ad_of_msb(7) = '1') and
+                                (ad_of_lsb(0) = '0' or ad_of_lsb(0) = '1') and
+                                (ad_of_lsb(1) = '0' or ad_of_lsb(1) = '1') and
+                                (ad_of_lsb(2) = '0' or ad_of_lsb(2) = '1') and
+                                (ad_of_lsb(3) = '0' or ad_of_lsb(3) = '1') and
+                                (ad_of_lsb(4) = '0' or ad_of_lsb(4) = '1') and
+                                (ad_of_lsb(5) = '0' or ad_of_lsb(5) = '1') and
+                                (ad_of_lsb(6) = '0' or ad_of_lsb(6) = '1') and
+                                (ad_of_lsb(7) = '0' or ad_of_lsb(7) = '1')) then
+                    mem_byte(to_integer(unsigned(ad_of_lsb))) <= Mem_dat(7 downto 0);
+                    mem_byte(to_integer(unsigned(ad_of_msb))) <= Mem_dat(15 downto 8);
+                end if;
+            else
+                mem_byte(200) <= (0 => '1', others => '0');
+                mem_byte(201) <= (1 => '1', others => '0');
+                mem_byte(202) <= (2 => '1', others => '0');
+                mem_byte(203) <= (3 => '1', others => '0');
+                mem_byte(204) <= (4 => '1', others => '0');
+                mem_byte(205) <= (5 => '1', others => '0');
+                mem_byte(206) <= (6 => '1', others => '0');
+                mem_byte(207) <= (7 => '1', others => '0');
             end if;
         end if;
 
         if(rst = '1' and clk'event and (clk  = '1')) then
-            mem_byte(200) <= (0 => '1', others => '0');
-            mem_byte(201) <= (1 => '1', others => '0');
-            mem_byte(202) <= (2 => '1', others => '0');
-            mem_byte(203) <= (3 => '1', others => '0');
-            mem_byte(204) <= (4 => '1', others => '0');
-            mem_byte(205) <= (5 => '1', others => '0');
-            mem_byte(206) <= (6 => '1', others => '0');
-            mem_byte(207) <= (7 => '1', others => '0');
+
         end if;
     end process;
 end Behave;

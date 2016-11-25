@@ -128,6 +128,7 @@ package EE224_Components is
             A1,A2,A3: in std_logic_vector (2 downto 0);
             D3,PC_in: in std_logic_vector(15 downto 0);
             D1,D2,PC_out: out std_logic_vector(15 downto 0);
+            R0,R1,R2,R3,R4,R5,R6,R7: out std_logic_vector(15 downto 0);
             rst, clk: in std_logic);
     end component;
 
