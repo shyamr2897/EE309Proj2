@@ -413,7 +413,7 @@ begin
     --branch location--
     rbl_a <= p2_pc_out;
     rbl_b <= p2_instr_out(5 downto 0);
-    rbl_e <= dhd_data2_out;
+    rbl_e <= dhd_data1_out;
     rbl_f <= p2_rr_br_loc_out;
     --
     rse: SixBitSignExtender port map (rbl_b, rbl_c);
@@ -432,7 +432,7 @@ begin
 
     --W memory location--
     rw_a <= p2_instr_out (5 downto 0);
-    rw_c <= dhd_data2_out;
+    rw_c <= dhd_data1_out;
     --
     rwlocse: SixBitSignExtender port map (rw_a, rw_b);
     rwadder: SixteenBitAdder port map (rw_b, rw_c, rw_d, rw_cout);

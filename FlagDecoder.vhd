@@ -31,7 +31,7 @@ begin
                     end if;
 
                 when "0010" =>
-                    x_n_z := in_z;
+                    --x_n_z := in_z;
                     x_condition := (not instr(1) and not instr(0)) or (o_c and instr(1))
                                     or (o_z and instr(0));
 
