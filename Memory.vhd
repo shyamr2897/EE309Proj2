@@ -15,6 +15,7 @@ end entity;
 
 architecture Behave of Memory is
     
+    --signal mem_byte: arr := MEM_INIT;
     signal mem_byte: arr := (others => (others => '0'));
     signal ad_of_lsb, ad_of_msb : std_logic_vector (15 downto 0);
 begin
@@ -63,7 +64,7 @@ begin
             
     process(clk,Mem_write,rst)
     begin
-        if(clk'event and (clk  = '1') and rst = '0') then
+        if(clk'event and (clk  = '1')) then
             if(rst = '0') then
                 if(Mem_write = '1' and (ad_of_msb(0) = '0' or ad_of_msb(0) = '1') and
                                 (ad_of_msb(1) = '0' or ad_of_msb(1) = '1') and
@@ -85,19 +86,10 @@ begin
                     mem_byte(to_integer(unsigned(ad_of_msb))) <= Mem_dat(15 downto 8);
                 end if;
             else
-                mem_byte(200) <= (0 => '1', others => '0');
-                mem_byte(201) <= (1 => '1', others => '0');
-                mem_byte(202) <= (2 => '1', others => '0');
-                mem_byte(203) <= (3 => '1', others => '0');
-                mem_byte(204) <= (4 => '1', others => '0');
-                mem_byte(205) <= (5 => '1', others => '0');
-                mem_byte(206) <= (6 => '1', others => '0');
-                mem_byte(207) <= (7 => '1', others => '0');
+
             end if;
         end if;
 
-        if(rst = '1' and clk'event and (clk  = '1')) then
 
-        end if;
     end process;
 end Behave;

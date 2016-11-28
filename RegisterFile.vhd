@@ -52,7 +52,7 @@ begin
     ----------------------
     --R0 related logic
     ----------------------
-    R_in(0) <= (1 => '1', 2 => '1', 5 => '1', 6 => '1', others => '0') when rst = '1' else D3;
+    R_in(0) <= (others => '0') when rst = '1' else D3;
     R_enable(0) <= (RF_write and ( not(A3(2)) and not(A3(1)) and not(A3(0)) )) or rst;
     Reg0: DataRegister
              generic map (data_width => 16)
@@ -63,7 +63,7 @@ begin
      ----------------------
     --R1 related logic
     ----------------------
-    R_in(1) <= "0000000000000001" when rst = '1' else D3;
+    R_in(1) <= "0000000000000000" when rst = '1' else D3;
     R_enable(1) <= (RF_write and ( not(A3(2)) and not(A3(1)) and A3(0) )) or rst;
     Reg1: DataRegister
              generic map (data_width => 16)
@@ -75,7 +75,7 @@ begin
     ----------------------
     --R2 related logic
     ----------------------
-    R_in(2) <= "0000000000000010"  when rst = '1' else D3;
+    R_in(2) <= "0000000000000000"  when rst = '1' else D3;
     R_enable(2) <= (RF_write and ( not(A3(2)) and A3(1) and not(A3(0)) )) or rst;
     Reg2: DataRegister
              generic map (data_width => 16)
@@ -86,7 +86,7 @@ begin
     ----------------------
     --R3 related logic
     ----------------------
-    R_in(3) <= "0000000000000011" when rst = '1' else D3;
+    R_in(3) <= "0000000000000000" when rst = '1' else D3;
     R_enable(3) <= (RF_write and ( not(A3(2)) and A3(1) and A3(0) )) or rst;
     Reg3: DataRegister
              generic map (data_width => 16)
@@ -97,7 +97,7 @@ begin
     ----------------------
     --R4 related logic
     ----------------------
-    R_in(4) <= "0000000000000100" when rst = '1' else D3;
+    R_in(4) <= "0000000000000000" when rst = '1' else D3;
     R_enable(4) <= (RF_write and ( A3(2) and not(A3(1)) and not(A3(0)) )) or rst;
     Reg4: DataRegister
              generic map (data_width => 16)
@@ -108,7 +108,7 @@ begin
     ----------------------
     --R5 related logic
     ----------------------
-    R_in(5) <= "0000000000000101" when rst = '1' else D3;
+    R_in(5) <= "0000000000000000" when rst = '1' else D3;
     R_enable(5) <= (RF_write and ( A3(2) and not(A3(1)) and A3(0) )) or rst;
     Reg5: DataRegister
              generic map (data_width => 16)
@@ -119,7 +119,7 @@ begin
     ----------------------
     --R6 related logic
     ----------------------
-    R_in(6) <= "0000000000000110" when rst = '1' else D3;
+    R_in(6) <= "0000000000000000" when rst = '1' else D3;
     R_enable(6) <= (RF_write and ( A3(2) and A3(1) and not(A3(0)) )) or rst;
     Reg6: DataRegister
              generic map (data_width => 16)

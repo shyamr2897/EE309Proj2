@@ -457,8 +457,6 @@ begin
     p3_mr_in <= p2_mr_out;
     p3_mw_in <= p2_mw_out;
     p3_rfw_in <= p2_rfw_out;
-    p3_rs1_in <= p2_rs1_out;
-    p3_rs2_in <= p2_rs2_out;
     p3_rd_in <= p2_rd_out;
     p3_br_st_in <= p2_br_st_out;
     p3_rs1_data_in <= p2_pc_out when p2_rs1_out = "111" else dhd_data1_out;
@@ -476,8 +474,6 @@ begin
                 p3_mr_out <= p3_mr_in;
                 p3_mw_out <= p3_mw_in;
                 p3_rfw_out <= p3_rfw_in;
-                p3_rs1_out <= p3_rs1_in;
-                p3_rs2_out <= p3_rs2_in;
                 p3_rd_out <= p3_rd_in;
                 p3_br_st_out <= p3_br_st_in;
                 p3_rs1_data_out <= p3_rs1_data_in;
@@ -493,8 +489,6 @@ begin
                 p3_mr_out <= '0';
                 p3_mw_out <= '0';
                 p3_rfw_out <= '0';
-                p3_rs1_out <= (others => '0');
-                p3_rs2_out <= (others => '0');
                 p3_rd_out <= (others => '0');
                 p3_br_st_out <= (others => '0');
                 p3_rs1_data_out <= (others => '0');
@@ -565,18 +559,13 @@ begin
     -----------------------------------------------------------------
     p4_enable <= '1';
     p4_instr_in <= p3_instr_out;
-    p4_pc_in <= p3_pc_out;
     p4_stall_in <= p3_stall_out or st_e_out;
     p4_branch_in <= p3_branch_out;
     p4_mr_in <= p3_mr_out;
     p4_mw_in <= p3_mw_out;
     p4_rfw_in <= erfw_d;
-    p4_rs1_in <= p3_rs1_out;
-    p4_rs2_in <= p3_rs2_out;
     p4_rd_in <= p3_rd_out;
     p4_br_st_in <= p3_br_st_out;
-    p4_rs1_data_in <= p3_rs1_data_out;
-    p4_rs2_data_in <= p3_rs2_data_out;
     p4_memloc_in <= p3_memloc_out;
     p4_memdat_in <= p3_memdat_out;
     p4_rd_data_in <= rdd_d;
@@ -587,18 +576,13 @@ begin
         if(clk'event and (clk  = '1')) then
             if(p4_enable = '1') then
                 p4_instr_out <= p4_instr_in;
-                p4_pc_out <= p4_pc_in;
                 p4_stall_out <= p4_stall_in;
                 p4_branch_out <= p4_branch_in;
                 p4_mr_out <= p4_mr_in;
                 p4_mw_out <= p4_mw_in;
                 p4_rfw_out <= p4_rfw_in;
-                p4_rs1_out <= p4_rs1_in;
-                p4_rs2_out <= p4_rs2_in;
                 p4_rd_out <= p4_rd_in;
                 p4_br_st_out <= p4_br_st_in;
-                p4_rs1_data_out <= p4_rs1_data_in;
-                p4_rs2_data_out <= p4_rs2_data_in;
                 p4_memloc_out <= p4_memloc_in;
                 p4_memdat_out <= p4_memdat_in;
                 p4_rd_data_out <= p4_rd_data_in;
@@ -607,18 +591,13 @@ begin
             end if;
             if(rst = '1') then
                 p4_instr_out <= (others => '0');
-                p4_pc_out <= (others => '0');
                 p4_stall_out <= '1';
                 p4_branch_out <= '0';
                 p4_mr_out <= '0';
                 p4_mw_out <= '0';
                 p4_rfw_out <= '0';
-                p4_rs1_out <= (others => '0');
-                p4_rs2_out <= (others => '0');
                 p4_rd_out <= (others => '0');
                 p4_br_st_out <= (others => '0');
-                p4_rs1_data_out <= (others => '0');
-                p4_rs2_data_out <= (others => '0');
                 p4_memloc_out <= (others => '0');
                 p4_memdat_out <= (others => '0');
                 p4_rd_data_out <= (others => '0');
@@ -658,21 +637,9 @@ begin
     --Pipeline Register p5
     -----------------------------------------------------------------
     p5_enable <= '1';
-    p5_instr_in <= p4_instr_out;
-    p5_pc_in <= p4_pc_out;
     p5_stall_in <= p4_stall_out;
-    p5_branch_in <= p4_branch_out;
-    p5_mr_in <= p4_mr_out;
-    p5_mw_in <= p4_mw_out;
     p5_rfw_in <= p4_rfw_out;
-    p5_rs1_in <= p4_rs1_out;
-    p5_rs2_in <= p4_rs2_out;
     p5_rd_in <= p4_rd_out;
-    p5_br_st_in <= p4_br_st_out;
-    p5_rs1_data_in <= p4_rs1_data_out;
-    p5_rs2_data_in <= p4_rs2_data_out;
-    p5_memloc_in <= p4_memloc_out;
-    p5_memdat_in <= p4_memdat_out;
     p5_rd_data_in <= mem_edb when memr = '1' else p4_rd_data_out;
     p5_z_in <= mlz_c;
     p5_c_in <= p4_c_out;
@@ -680,41 +647,17 @@ begin
     begin
         if(clk'event and (clk  = '1')) then
             if(p5_enable = '1') then
-                p5_instr_out <= p5_instr_in;
-                p5_pc_out <= p5_pc_in;
                 p5_stall_out <= p5_stall_in;
-                p5_branch_out <= p5_branch_in;
-                p5_mr_out <= p5_mr_in;
-                p5_mw_out <= p5_mw_in;
                 p5_rfw_out <= p5_rfw_in;
-                p5_rs1_out <= p5_rs1_in;
-                p5_rs2_out <= p5_rs2_in;
                 p5_rd_out <= p5_rd_in;
-                p5_br_st_out <= p5_br_st_in;
-                p5_rs1_data_out <= p5_rs1_data_in;
-                p5_rs2_data_out <= p5_rs2_data_in;
-                p5_memloc_out <= p5_memloc_in;
-                p5_memdat_out <= p5_memdat_in;
                 p5_rd_data_out <= p5_rd_data_in;
                 p5_z_out <= p5_z_in;
                 p5_c_out <= p5_c_in;
             end if;
             if(rst = '1') then
-                p5_instr_out <= (others => '0');
-                p5_pc_out <= (others => '0');
                 p5_stall_out <= '1';
-                p5_branch_out <= '0';
-                p5_mr_out <= '0';
-                p5_mw_out <= '0';
                 p5_rfw_out <= '0';
-                p5_rs1_out <= (others => '0');
-                p5_rs2_out <= (others => '0');
                 p5_rd_out <= (others => '0');
-                p5_br_st_out <= (others => '0');
-                p5_rs1_data_out <= (others => '0');
-                p5_rs2_data_out <= (others => '0');
-                p5_memloc_out <= (others => '0');
-                p5_memdat_out <= (others => '0');
                 p5_rd_data_out <= (others => '0');
                 p5_z_out <= '0';
                 p5_c_out <= '0';
